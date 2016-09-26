@@ -23,7 +23,9 @@ struct Command {
 
 static struct Command commands[] = {
 	{ "help", "Display this list of commands", mon_help },
-	{ "kerninfo", "Display information about the kernel", mon_kerninfo },
+    { "kerninfo", "Display information about the kernel", mon_kerninfo },
+    { "backtrace", "Display stack frames", mon_backtrace },
+    { "my_command", "Display \"Hallo, user!\" text", my_command },
 };
 #define NCOMMANDS (sizeof(commands)/sizeof(commands[0]))
 
@@ -32,11 +34,18 @@ static struct Command commands[] = {
 int
 mon_help(int argc, char **argv, struct Trapframe *tf)
 {
-	int i;
+    int i;
+    
+    for (i = 0; i < NCOMMANDS; i++)
+    cprintf("%s - %s\n", commands[i].name, commands[i].desc);
+    return 0;
+}
 
-	for (i = 0; i < NCOMMANDS; i++)
-		cprintf("%s - %s\n", commands[i].name, commands[i].desc);
-	return 0;
+int
+my_command(int argc, char **argv, struct Trapframe *tf)
+{
+    cprintf("Hallo, user! %o\n", 8);
+    return 0;
 }
 
 int
@@ -62,11 +71,29 @@ mon_kerninfo(int argc, char **argv, struct Trapframe *tf)
 int
 mon_backtrace(int argc, char **argv, struct Trapframe *tf)
 {
-	// Your code here.
-	return 0;
+    uint32_t *ebp = (uint32_t*)read_ebp();
+    struct Eipdebuginfo info;
+    
+    cprintf ("Stack backtrace:\n");
+    while (ebp){
+        cprintf (" ebp %08x eip %08x args %08x %08x %08x %08x %08x\n",
+                       (unsigned int)ebp,
+                                ebp[1],   ebp[2],
+                                               ebp[3],
+                                                    ebp[4],
+                                                         ebp[5],
+                                                              ebp[6]);
+        
+        debuginfo_eip(ebp[1],&info);
+        cprintf ("%s:%d: %.*s+%d\n",info.eip_file
+                 ,info.eip_line
+                 ,info.eip_fn_namelen,info.eip_fn_name
+                 ,ebp[1]-info.eip_fn_addr);
+        
+        ebp = (uint32_t*) ebp[0];
+    }
+    return 0;
 }
-
-
 
 /***** Kernel monitor command interpreter *****/
 
