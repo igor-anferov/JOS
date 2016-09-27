@@ -159,7 +159,12 @@ QEMUOPTS += $(shell if $(QEMU) -nographic -help | grep -q '^-D '; then echo '-D 
 IMAGES = $(OBJDIR)/kern/kernel.img
 QEMUOPTS += $(QEMUEXTRA)
 
-POST_CHECKOUT = \#!/bin/sh -x\\nmake clean
+define POST_CHECKOUT
+#!/bin/sh -x
+make clean
+endef
+export POST_CHECKOUT
+
 define PRE_COMMIT
 #!/bin/sh
 
@@ -175,7 +180,7 @@ endef
 export PRE_COMMIT
 
 .git/hooks/post-checkout:
-	@echo -e "$(POST_CHECKOUT)" > $@
+	@echo "$$POST_CHECKOUT" > $@
 	@chmod +x $@
 
 .git/hooks/pre-commit:
