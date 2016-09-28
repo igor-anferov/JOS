@@ -141,6 +141,7 @@ endif
 # the variable's value has changed, this will update the vars file and
 # force a rebuild of the rule that depends on it.
 $(OBJDIR)/.vars.%: FORCE
+	@test -f $@ || touch $@
 	$(V)echo "$($*)" | cmp -s $@ || echo "$($*)" > $@
 .PRECIOUS: $(OBJDIR)/.vars.%
 .PHONY: FORCE
