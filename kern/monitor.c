@@ -44,7 +44,7 @@ mon_help(int argc, char **argv, struct Trapframe *tf)
 int
 my_command(int argc, char **argv, struct Trapframe *tf)
 {
-    cprintf("Hallo, user! %o\n", 8);
+    cprintf("Hallo, user!\n");
     return 0;
 }
 
@@ -85,10 +85,11 @@ mon_backtrace(int argc, char **argv, struct Trapframe *tf)
                                                               ebp[6]);
         
         debuginfo_eip(ebp[1],&info);
-        cprintf ("%s:%d: %.*s+%d\n",info.eip_file
-                 ,info.eip_line
-                 ,info.eip_fn_namelen,info.eip_fn_name
-                 ,ebp[1]-info.eip_fn_addr);
+        cprintf ("%s:%d: %.*s+%d\n",
+                 info.eip_file,
+                     info.eip_line,
+                         info.eip_fn_namelen, info.eip_fn_name,
+                              ebp[1]-info.eip_fn_addr);
         
         ebp = (uint32_t*) ebp[0];
     }
