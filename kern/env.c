@@ -12,6 +12,7 @@
 #include <kern/monitor.h>
 #include <kern/sched.h>
 #include <kern/cpu.h>
+#include <kern/kdebug.h>
 
 struct Env env_array[NENV];
 struct Env *curenv = NULL;
@@ -121,7 +122,17 @@ env_init(void)
 {
 	// Set up envs array
 	// LAB 3: Your code here.
-	
+    
+    size_t i;
+    
+    env_free_list = envs;
+
+    for (i=0; i<NENV; i++) {
+        env_array[i].env_id = 0;
+        env_array[i].env_status = ENV_FREE;
+        env_array[i].env_link = i+1 == NENV ? NULL : &( env_array[i+1] );
+    }
+    
 	// Per-CPU part of the initialization
 	env_init_percpu();
 }
@@ -160,6 +171,8 @@ env_alloc(struct Env **newenv_store, envid_t parent_id)
 {
 	int32_t generation;
 	struct Env *e;
+    static int32_t stackTop = 0;
+    int32_t low_stack = 0x210000;
 
 	if (!(e = env_free_list)) {
 		return -E_NO_FREE_ENV;
@@ -200,7 +213,8 @@ env_alloc(struct Env **newenv_store, envid_t parent_id)
 	e->env_tf.tf_ss = GD_KD | 0;
 	e->env_tf.tf_cs = GD_KT | 0;
 	// LAB 3: Your code here.
-	// e->env_tf.tf_esp = 0x210000;
+    stackTop = (stackTop + 2*PGSIZE) % (0xFFFFFF - 0x210000);
+    e->env_tf.tf_esp = low_stack + stackTop;
 #else
 #endif
 	// You will set e->env_tf.tf_eip later.
@@ -219,16 +233,44 @@ bind_functions(struct Env *e, struct Elf *elf)
 {
 	//find_function from kdebug.c should be used
 	//LAB 3: Your code here.
+    
+    struct Secthdr *sh, *esh, *symTab = NULL, *stringTab = NULL;
+    struct Elf32_Sym *sym, *esym;
+    char *strtable;
+    uintptr_t addr;
+    
+    sh = (struct Secthdr *) ((void *)elf + elf->e_shoff);
+    esh = sh + elf->e_shnum;
+    
+    for (; sh < esh; sh++) {
+        if (sh->sh_type == ELF_SHT_SYMTAB)
+            symTab=sh;
+        if (sh->sh_type == ELF_SHT_STRTAB)
+            stringTab=sh;
+    }
 
-	/*
-	*((int *) 0x00231008) = (int) &cprintf;
-	*((int *) 0x00221004) = (int) &sys_yield;
-	*((int *) 0x00231004) = (int) &sys_yield;
-	*((int *) 0x00241004) = (int) &sys_yield;
-	*((int *) 0x0022100c) = (int) &sys_exit;
-	*((int *) 0x00231010) = (int) &sys_exit;
-	*((int *) 0x0024100c) = (int) &sys_exit;
-	*/
+    strtable = (char *) ((void *)elf + stringTab->sh_offset);
+    sym = (struct Elf32_Sym *) ((void *)elf + symTab->sh_offset);
+    esym = (struct Elf32_Sym *) ((void *)sym + symTab->sh_size);
+    
+    for (; sym < esym; sym++) {
+        if ( ELF32_ST_TYPE(sym->st_info) == STT_OBJECT &&
+            ELF32_ST_BIND(sym->st_info) == 1 ) {
+            if ((addr = find_function( &(strtable[sym->st_name]) )) == 0) {
+                continue;
+            }
+            *((int *) sym->st_value) = addr;
+        }
+    }
+	
+//	*((int *) 0x00231008) = (int) &cprintf;
+//	*((int *) 0x00221004) = (int) &sys_yield;
+//	*((int *) 0x00231004) = (int) &sys_yield;
+//	*((int *) 0x00241004) = (int) &sys_yield;
+//	*((int *) 0x0022100c) = (int) &sys_exit;
+//	*((int *) 0x00231010) = (int) &sys_exit;
+//	*((int *) 0x0024100c) = (int) &sys_exit;
+	
 }
 #endif
 
@@ -275,10 +317,28 @@ load_icode(struct Env *e, uint8_t *binary, size_t size)
 	//  What?  (See env_run() and env_pop_tf() below.)
 
 	// LAB 3: Your code here.
-	
+    struct Proghdr *ph, *eph;
+    struct Elf *elfhdr;
+    
+    elfhdr = (struct Elf *) binary;
+    if (elfhdr->e_magic != ELF_MAGIC)
+        panic("Not a valid ELF.\n");
+    
+    ph = (struct Proghdr *) (binary + elfhdr->e_phoff);
+    eph = ph + elfhdr->e_phnum;
+    
+    for (; ph < eph; ph++) {
+        if (ph->p_type != ELF_PROG_LOAD)
+            continue;
+        memset((void *)(uintptr_t)ph->p_va, 0, ph->p_memsz);
+        memmove((void*)ph->p_va, binary+ph->p_offset, ph->p_filesz);
+    }
+    
+    e->env_tf.tf_eip = elfhdr->e_entry;
+    
 #ifdef CONFIG_KSPACE
 	// Uncomment this for task №5.
-	//bind_functions();
+	bind_functions(e, elfhdr);
 #endif
 }
 
@@ -293,6 +353,13 @@ void
 env_create(uint8_t *binary, size_t size, enum EnvType type)
 {
 	//LAB 3: Your code here.
+    struct Env *newenv;
+    int r;
+    if((r = env_alloc(&newenv, 0)) < 0 )
+        panic("env_alloc failed: %e.\n", r);
+    
+    load_icode(newenv, binary, size);
+    newenv->env_type = type;
 }
 
 //
@@ -339,6 +406,7 @@ void
 csys_exit(void)
 {
 	env_destroy(curenv);
+    sched_halt();
 }
 
 void
@@ -420,11 +488,18 @@ env_run(struct Env *e)
 	//	e->env_tf to sensible values.
 	//
 	//LAB 3: Your code here.
-
-	cprintf("envrun %s: %d\n",
-		e->env_status == ENV_RUNNING ? "RUNNING" :
-		    e->env_status == ENV_RUNNABLE ? "RUNNABLE" : "(unknown)",
-		ENVX(e->env_id));
+    
+    cprintf("envrun %s: %d\n",
+            e->env_status == ENV_RUNNING ? "RUNNING" :
+            e->env_status == ENV_RUNNABLE ? "RUNNABLE" : "(unknown)",
+            ENVX(e->env_id));
+    
+    if ( curenv && curenv->env_status == ENV_RUNNING)
+        curenv->env_status = ENV_RUNNABLE;
+    curenv = e;
+    assert(curenv->env_status == ENV_RUNNABLE);
+    curenv->env_status = ENV_RUNNING;
+    curenv->env_runs += 1;
 
 	env_pop_tf(&e->env_tf);
 }
