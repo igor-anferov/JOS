@@ -219,7 +219,7 @@ find_function(const char * const fname)
     char *cur = (char *)stabstr;
     
     for (; cur < stabstr_end - strlen(fname); cur++) {
-        if ( strncmp(cur, fname, strlen(fname)) == 0 && cur[strlen(fname)] == ':' ) {
+        if ( strncmp(cur, fname, strlen(fname)) == 0 && cur[strlen(fname)] == ':' && cur[-1] == '\0') {
             for (; stabs<stab_end; stabs++) {
                 if (stabs->n_type == N_FUN &&
                     stabs->n_strx == cur-stabstr) {
