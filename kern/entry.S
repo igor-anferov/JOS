@@ -61,6 +61,7 @@ entry:
 	movl	$(bootstacktop),%esp
 
 	# now to C code
+    cli
 	call	i386_init
 
 	# Should never get here, but in case we do, just spin.
@@ -107,6 +108,7 @@ _generall_syscall:
 .type  sys_yield, @function
 sys_yield:
 	call _generall_syscall
+    cli
 	call csys_yield
 	jmp .
 
@@ -115,6 +117,7 @@ sys_yield:
 .globl sys_exit
 .type  sys_exit, @function
 sys_exit:
+    cli
 	call csys_exit
 	jmp .
 #endif

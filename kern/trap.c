@@ -162,6 +162,11 @@ trap(struct Trapframe *tf)
 	assert(!(read_eflags() & FL_IF));
 
 	assert(curenv);
+    
+#define PF_BIT_MASK 1 << 6
+    
+    if ( rtc_check_status() & PF_BIT_MASK )
+        pic_send_eoi(PIC_EOI);
 
 	// Garbage collect if current enviroment is a zombie
 	if (curenv->env_status == ENV_DYING) {
