@@ -11,6 +11,7 @@
 #define TIMES 100
 
 unsigned long cpu_freq;
+unsigned long long time = 0;
 /*
  * This reads the current MSB of the PIT counter, and
  * checks if we are running on sufficiently fast and
@@ -183,10 +184,25 @@ void tsc_calibrate(void)
 void timer_start(void)
 {
     //Lab 5: You code here
+    unsigned int lo, hi;
+    
+    if (time) {
+//        panic("Double START.\n");
+    }
+    asm volatile ( "rdtsc\n" : "=a" (lo), "=d" (hi) );
+    time = ((unsigned long long)hi << 32) | lo;
 }
 
 void timer_stop(void)
 {
     //Lab 5: You code here
+    unsigned int lo, hi;
+    
+    if (time == 0) {
+//        panic("Stop before start.\n");
+    }
+    asm volatile ( "rdtsc\n" : "=a" (lo), "=d" (hi) );
+    time -= ((unsigned long long)hi << 32) | lo;
+    cprintf("Time: %llu s\n", time/cpu_freq);
 }
 

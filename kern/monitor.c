@@ -10,6 +10,7 @@
 #include <kern/console.h>
 #include <kern/monitor.h>
 #include <kern/kdebug.h>
+#include <kern/tsc.h>
 
 #define CMDBUF_SIZE	80	// enough for one VGA text line
 
@@ -26,6 +27,8 @@ static struct Command commands[] = {
     { "kerninfo", "Display information about the kernel", mon_kerninfo },
     { "backtrace", "Display stack frames", mon_backtrace },
     { "my_command", "Display \"Hallo, user!\" text", my_command },
+    { "start", "Start timer", start_t },
+    { "stop", "Stop timer and display time", stop_t },
 };
 #define NCOMMANDS (sizeof(commands)/sizeof(commands[0]))
 
@@ -49,6 +52,20 @@ my_command(int argc, char **argv, struct Trapframe *tf)
 }
 
 int
+start_t(int argc, char **argv, struct Trapframe *tf)
+{
+    timer_start();
+    return 0;
+}
+
+int
+stop_t(int argc, char **argv, struct Trapframe *tf)
+{
+    timer_stop();
+    return 0;
+}
+
+int
 mon_kerninfo(int argc, char **argv, struct Trapframe *tf)
 {
 	extern char _start[], entry[], etext[], edata[], end[];
@@ -64,7 +81,7 @@ mon_kerninfo(int argc, char **argv, struct Trapframe *tf)
 	cprintf("  end    %08x (virt)  %08x (phys)\n",
             (uint32_t)end, (uint32_t)end - KERNTOP);
 	cprintf("Kernel executable memory footprint: %dKB\n",
-		ROUNDUP(end - entry, 1024) / 1024);
+		(uint32_t) ROUNDUP(end - entry, 1024) / 1024);
 	return 0;
 }
 

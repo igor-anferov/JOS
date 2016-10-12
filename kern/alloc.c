@@ -10,7 +10,7 @@ static uint8_t space[SPACE_SIZE];
 static Header base = { .s = { .next = (Header *) space, .prev = (Header *) space, .size = 0 } }; /* empty list to get started */
 
 static Header *freep = NULL; /* start of free list */
-
+static struct spinlock lock = { .locked = 0 };
 
 static void check_list(void)
 {
@@ -33,6 +33,8 @@ test_alloc(uint8_t nbytes)
 {
 	Header *p;
 	unsigned nunits;
+    
+    spin_lock(&lock);
 
 	nunits = (nbytes + sizeof(Header) - 1) / sizeof(Header) + 1;
 
@@ -62,12 +64,18 @@ test_alloc(uint8_t nbytes)
 			return NULL;
 		}
 	}
+    
+    spin_unlock(&lock);
+
 }
 
 /* free: put block ap in free list */
 void
 test_free(void *ap)
 {
+    
+    spin_lock(&lock);
+
 	Header *bp, *p;
 	bp = (Header *) ap - 1; /* point to block header */
 
@@ -89,5 +97,8 @@ test_free(void *ap)
 	freep = p;
 
 	check_list();
+    
+    spin_unlock(&lock);
+
 }
 

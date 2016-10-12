@@ -13,7 +13,8 @@ rtc_init(void)
     
     outb(IO_RTC_CMND, RTC_AREG);
     reg = inb(IO_RTC_DATA);
-    reg |= 15;
+    reg &= ~15;
+    reg |= 3;
     outb(IO_RTC_DATA, reg);
     
     outb(IO_RTC_CMND, RTC_BREG);

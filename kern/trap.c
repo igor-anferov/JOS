@@ -165,9 +165,10 @@ trap(struct Trapframe *tf)
     
 #define PF_BIT_MASK 1 << 6
     
-    if ( rtc_check_status() & PF_BIT_MASK )
+    if ( rtc_check_status() & PF_BIT_MASK ) {
         pic_send_eoi(PIC_EOI);
-
+    }
+    
 	// Garbage collect if current enviroment is a zombie
 	if (curenv->env_status == ENV_DYING) {
 		env_free(curenv);
