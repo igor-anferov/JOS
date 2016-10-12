@@ -33,9 +33,15 @@ i386_init(void)
 
 #ifdef CONFIG_KSPACE
 	// Touch all you want.
+#if __GNUC__ < 6
 	ENV_CREATE_KERNEL_TYPE(prog_test1);
 	ENV_CREATE_KERNEL_TYPE(prog_test2);
 	ENV_CREATE_KERNEL_TYPE(prog_test3);
+#else
+    ENV_CREATE_KERNEL_TYPE(prog__test1);
+    ENV_CREATE_KERNEL_TYPE(prog__test2);
+    ENV_CREATE_KERNEL_TYPE(prog__test3);
+#endif
 #endif
 
 	// Schedule and run the first user environment!

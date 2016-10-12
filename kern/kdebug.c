@@ -2,6 +2,7 @@
 #include <inc/string.h>
 #include <inc/memlayout.h>
 #include <inc/assert.h>
+#include <inc/stdio.h>
 
 #include <kern/kdebug.h>
 
@@ -219,7 +220,8 @@ find_function(const char * const fname)
     char *cur = (char *)stabstr;
     
     for (; cur < stabstr_end - strlen(fname); cur++) {
-        if ( strncmp(cur, fname, strlen(fname)) == 0 && cur[strlen(fname)] == ':' && cur[-1] == '\0') {
+        if ( strncmp(cur, fname, strlen(fname)) == 0 && cur[strlen(fname)] == ':' &&
+                                            (cur == (char *)stabstr || cur[-1] == '\0')) {
             for (; stabs<stab_end; stabs++) {
                 if (stabs->n_type == N_FUN &&
                     stabs->n_strx == cur-stabstr) {
@@ -228,7 +230,6 @@ find_function(const char * const fname)
             }
         }
     }
-
 	return 0;
 }
 
