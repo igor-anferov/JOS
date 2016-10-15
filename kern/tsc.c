@@ -1,7 +1,7 @@
 /* This file mostly get from linux: arch/x86/kern/tsc.c */
 
 #include <inc/x86.h>
-#include <inc/stdio.h>
+#include <inc/assert.h>
 
 #include <kern/tsc.h>
 
@@ -184,25 +184,24 @@ void tsc_calibrate(void)
 void timer_start(void)
 {
     //Lab 5: You code here
-    unsigned int lo, hi;
     
     if (time) {
-//        panic("Double START.\n");
+        cprintf("ERROR! Double START.\n");
+        return;
     }
-    asm volatile ( "rdtsc\n" : "=a" (lo), "=d" (hi) );
-    time = ((unsigned long long)hi << 32) | lo;
+    time = read_tsc();
 }
 
 void timer_stop(void)
 {
     //Lab 5: You code here
-    unsigned int lo, hi;
     
     if (time == 0) {
-//        panic("Stop before start.\n");
+        cprintf("ERROR! Stop before start.\n");
+        return;
     }
-    asm volatile ( "rdtsc\n" : "=a" (lo), "=d" (hi) );
-    time -= ((unsigned long long)hi << 32) | lo;
-    cprintf("Time: %llu s\n", time/cpu_freq);
+    time = read_tsc()-time;
+    cprintf("Time: %llu.%llu s\n", time/(cpu_freq*1000), time%(cpu_freq*1000)/(long)10E6);
+    time = 0;
 }
 
