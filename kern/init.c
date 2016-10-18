@@ -50,14 +50,14 @@ i386_init(void)
     ENV_CREATE_KERNEL_TYPE(prog_test1);
     ENV_CREATE_KERNEL_TYPE(prog_test2);
     ENV_CREATE_KERNEL_TYPE(prog_test3);
-    ENV_CREATE_KERNEL_TYPE(prog_test4);
-    ENV_CREATE_KERNEL_TYPE(prog_test5);
-    ENV_CREATE_KERNEL_TYPE(prog_test6);
+//    ENV_CREATE_KERNEL_TYPE(prog_test4);
+//    ENV_CREATE_KERNEL_TYPE(prog_test5);
+//    ENV_CREATE_KERNEL_TYPE(prog_test6);
 #else
 	// Touch all you want.
-//	ENV_CREATE_KERNEL_TYPE(prog__test1);
-//	ENV_CREATE_KERNEL_TYPE(prog__test2);
-//	ENV_CREATE_KERNEL_TYPE(prog__test3);
+	ENV_CREATE_KERNEL_TYPE(prog__test1);
+	ENV_CREATE_KERNEL_TYPE(prog__test2);
+	ENV_CREATE_KERNEL_TYPE(prog__test3);
 //	ENV_CREATE_KERNEL_TYPE(prog__test4);
 //	ENV_CREATE_KERNEL_TYPE(prog__test5);
 //	ENV_CREATE_KERNEL_TYPE(prog__test6);
