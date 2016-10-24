@@ -171,8 +171,10 @@ env_alloc(struct Env **newenv_store, envid_t parent_id)
 {
 	int32_t generation;
 	struct Env *e;
+#ifdef CONFIG_KSPACE
     static int32_t stackTop = 0;
-    int32_t low_stack = 0x510000;
+    int32_t low_stack = 0x210000;
+#endif
 
 	if (!(e = env_free_list)) {
 		return -E_NO_FREE_ENV;
@@ -213,7 +215,7 @@ env_alloc(struct Env **newenv_store, envid_t parent_id)
 	e->env_tf.tf_ss = GD_KD | 0;
 	e->env_tf.tf_cs = GD_KT | 0;
 	// LAB 3: Your code here.
-    stackTop = (stackTop + 10*PGSIZE) % (0xFFFFFF - low_stack);
+    stackTop = (stackTop + 2*PGSIZE) % (0x260000 - low_stack);
     e->env_tf.tf_esp = low_stack + stackTop;
 #else
 #endif
