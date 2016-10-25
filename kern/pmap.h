@@ -61,6 +61,9 @@ struct PageInfo *page_lookup(pde_t *pgdir, void *va, pte_t **pte_store);
 void	page_decref(struct PageInfo *pp);
 
 void	tlb_invalidate(pde_t *pgdir, void *va);
+void    meminfo(void);
+void    print_page_free_list_info(struct PageInfo *);
+
 
 static inline physaddr_t
 page2pa(struct PageInfo *pp)

@@ -11,6 +11,7 @@
 #include <kern/monitor.h>
 #include <kern/kdebug.h>
 #include <kern/tsc.h>
+#include <kern/pmap.h>
 
 #define CMDBUF_SIZE	80	// enough for one VGA text line
 
@@ -29,6 +30,7 @@ static struct Command commands[] = {
     { "my_command", "Display \"Hallo, user!\" text", my_command },
     { "start", "Start timer", start_t },
     { "stop", "Stop timer and display time", stop_t },
+    { "meminfo", "Show information about memory pages", mem_info },
 };
 #define NCOMMANDS (sizeof(commands)/sizeof(commands[0]))
 
@@ -62,6 +64,13 @@ int
 stop_t(int argc, char **argv, struct Trapframe *tf)
 {
     timer_stop();
+    return 0;
+}
+
+int
+mem_info(int argc, char **argv, struct Trapframe *tf)
+{
+    meminfo();
     return 0;
 }
 
