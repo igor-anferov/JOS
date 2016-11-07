@@ -49,24 +49,32 @@ i386_init(void)
 	rtc_init();
     
     irq_setmask_8259A(irq_mask_8259A & ~(1<<IRQ_CLOCK));
-
-#if __GNUC__ < 6
-
     
 #ifdef CONFIG_KSPACE
-	ENV_CREATE_KERNEL_TYPE(prog_test1);
-	ENV_CREATE_KERNEL_TYPE(prog_test2);
-	ENV_CREATE_KERNEL_TYPE(prog_test3);
-	ENV_CREATE_KERNEL_TYPE(prog_test4);
-	ENV_CREATE_KERNEL_TYPE(prog_test5);
-	ENV_CREATE_KERNEL_TYPE(prog_test6);
+#if __GNUC__ < 6
+    // Touch all you want.
+    ENV_CREATE_KERNEL_TYPE(prog_test1);
+    ENV_CREATE_KERNEL_TYPE(prog_test2);
+    ENV_CREATE_KERNEL_TYPE(prog_test3);
+    ENV_CREATE_KERNEL_TYPE(prog_test4);
+    ENV_CREATE_KERNEL_TYPE(prog_test5);
+    ENV_CREATE_KERNEL_TYPE(prog_test6);
+#else
+    // Touch all you want.
+    ENV_CREATE_KERNEL_TYPE(prog__test1);
+    ENV_CREATE_KERNEL_TYPE(prog__test2);
+    ENV_CREATE_KERNEL_TYPE(prog__test3);
+    ENV_CREATE_KERNEL_TYPE(prog__test4);
+    ENV_CREATE_KERNEL_TYPE(prog__test5);
+    ENV_CREATE_KERNEL_TYPE(prog__test6);
+#endif
 #else
 #if defined(TEST)
-	// Don't touch -- used by grading script!
-	ENV_CREATE(TEST, ENV_TYPE_USER);
+    // Don't touch -- used by grading script!
+    ENV_CREATE(TEST, ENV_TYPE_USER);
 #else
-	// Touch all you want.
-	ENV_CREATE(user_hello, ENV_TYPE_USER);
+    // Touch all you want.
+    ENV_CREATE(user_hello, ENV_TYPE_USER);
 #endif // TEST*
 #endif
 
