@@ -88,7 +88,7 @@ trap_init(void)
     void th16();
     SETGATE(idt[0], 0, GD_KT, th0, 0);
     SETGATE(idt[1], 0, GD_KT, th1, 0);
-    SETGATE(idt[3], 0, GD_KT, th3, 0);
+    SETGATE(idt[3], 0, GD_KT, th3, 3);
     SETGATE(idt[4], 0, GD_KT, th4, 0);
     SETGATE(idt[5], 0, GD_KT, th5, 0);
     SETGATE(idt[6], 0, GD_KT, th6, 0);
@@ -203,6 +203,23 @@ trap_dispatch(struct Trapframe *tf)
 		sched_yield();
 		return;
 	}
+    
+    if (tf->tf_trapno == T_PGFLT) {
+        page_fault_handler(tf);
+        return;
+    }
+    
+    if (tf->tf_trapno == T_BRKPT) {
+        monitor(tf);
+        return;
+    }
+    
+    if (tf->tf_trapno == T_SYSCALL) {
+        tf->tf_regs.reg_eax =
+        syscall(tf->tf_regs.reg_eax, tf->tf_regs.reg_edx, tf->tf_regs.reg_ecx,
+                tf->tf_regs.reg_ebx, tf->tf_regs.reg_edi, tf->tf_regs.reg_esi);
+        return;
+    }
 
 	print_trapframe(tf);
 	if (tf->tf_cs == GD_KT) {
@@ -281,6 +298,8 @@ page_fault_handler(struct Trapframe *tf)
 	// Handle kernel-mode page faults.
 
 	// LAB 8: Your code here.
+    if ((tf->tf_cs&3) == 0)
+        panic("Kernel page fault!");
 
 	// We've already handled kernel-mode exceptions, so if we get here,
 	// the page fault happened in user mode.
