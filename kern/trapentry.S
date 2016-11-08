@@ -67,6 +67,7 @@ TRAPHANDLER(th12, 12)
 TRAPHANDLER(th13, 13)
 TRAPHANDLER(th14, 14)
 TRAPHANDLER_NOEC(th16, 16)
+TRAPHANDLER_NOEC(th48, 48)
 
 .globl _alltraps
 .type _alltraps, @function;
