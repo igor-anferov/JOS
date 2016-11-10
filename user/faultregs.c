@@ -89,7 +89,7 @@ pgfault(struct UTrapframe *utf)
 
 	// Map UTEMP so the write succeeds
 	if ((r = sys_page_alloc(0, UTEMP, PTE_U|PTE_P|PTE_W)) < 0)
-		panic("sys_page_alloc: %e", r);
+		panic("sys_page_alloc: %i", r);
 }
 
 void
