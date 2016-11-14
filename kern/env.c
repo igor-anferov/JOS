@@ -288,6 +288,15 @@ env_alloc(struct Env **newenv_store, envid_t parent_id)
 
 	// You will set e->env_tf.tf_eip later.
 
+	// Enable interrupts while in user mode.
+	// LAB 9: Your code here.
+
+	// Clear the page fault handler until user installs one.
+	e->env_pgfault_upcall = 0;
+
+	// Also clear the IPC receiving flag.
+	e->env_ipc_recving = 0;
+
 	// commit the allocation
 	env_free_list = e->env_link;
 	*newenv_store = e;
@@ -660,18 +669,12 @@ env_run(struct Env *e)
 	//	e->env_tf to sensible values.
 	//
 	//LAB 3: Your code here.
-    
-    cprintf("envrun %s: %d\n",
-            e->env_status == ENV_RUNNING ? "RUNNING" :
-            e->env_status == ENV_RUNNABLE ? "RUNNABLE" : "(unknown)",
-            ENVX(e->env_id));
-    
-    if (e->env_status == ENV_RUNNING)
-        e->env_status = ENV_RUNNABLE;
-    curenv = e;
-    e->env_status = ENV_RUNNING;
-    e->env_runs++;
-    lcr3(PADDR(e->env_pgdir));
-    env_pop_tf(&e->env_tf);
+
+	/*cprintf("envrun %s: %d\n",
+		e->env_status == ENV_RUNNING ? "RUNNING" :
+		    e->env_status == ENV_RUNNABLE ? "RUNNABLE" : "(unknown)",
+		ENVX(e->env_id));*/
+
+	env_pop_tf(&e->env_tf);
 }
 
