@@ -481,7 +481,7 @@ env_create(uint8_t *binary, size_t size, enum EnvType type)
     struct Env *newenv;
     int r;
     if((r = env_alloc(&newenv, 0)) < 0 )
-        panic("env_alloc failed: %e.\n", r);
+        panic("env_alloc failed: %e.\n", (double)r);
     
     load_icode(newenv, binary, size);
     newenv->env_type = type;
