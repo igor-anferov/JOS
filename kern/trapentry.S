@@ -119,5 +119,7 @@ clock_thdlr:
 	jmp .
 #else
 clock_thdlr:
-    jmp .
+    pushl $0;
+    pushl $(IRQ_OFFSET + IRQ_CLOCK);
+    jmp _alltraps
 #endif
