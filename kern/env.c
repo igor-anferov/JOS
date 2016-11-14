@@ -567,11 +567,17 @@ env_destroy(struct Env *e)
 		sched_yield();
 	}
 #else
-	env_free(e);
-
-	cprintf("Destroyed the only environment - nothing more to do!\n");
-	while (1)
-		monitor(NULL);
+    if (e->env_status == ENV_RUNNING && curenv != e) {
+        e->env_status = ENV_DYING;
+        return;
+    }
+    
+    env_free(e);
+    
+    if (curenv == e) {
+        curenv = NULL;
+        sched_yield();
+    }
 #endif
 }
 
@@ -669,12 +675,16 @@ env_run(struct Env *e)
 	//	e->env_tf to sensible values.
 	//
 	//LAB 3: Your code here.
-
-	/*cprintf("envrun %s: %d\n",
-		e->env_status == ENV_RUNNING ? "RUNNING" :
-		    e->env_status == ENV_RUNNABLE ? "RUNNABLE" : "(unknown)",
-		ENVX(e->env_id));*/
-
-	env_pop_tf(&e->env_tf);
+/*
+    cprintf("envrun %s: %d\n",
+            e->env_status == ENV_RUNNING ? "RUNNING" :
+            e->env_status == ENV_RUNNABLE ? "RUNNABLE" : "(unknown)",
+            ENVX(e->env_id));
+*/
+    curenv = e;
+    e->env_status = ENV_RUNNING;
+    e->env_runs++;
+    lcr3(PADDR(e->env_pgdir));
+    env_pop_tf(&e->env_tf);
 }
 
