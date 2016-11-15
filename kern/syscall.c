@@ -185,7 +185,7 @@ sys_page_alloc(envid_t envid, void *va, int perm)
     if ((perm & flag) != flag)
         return -E_INVAL;
     
-    struct PageInfo *pg = page_alloc(1);
+    struct PageInfo *pg = page_alloc(ALLOC_ZERO);
     if (!pg)
         return -E_NO_MEM;
     pg->pp_ref++;
@@ -209,7 +209,7 @@ sys_page_alloc(envid_t envid, void *va, int perm)
 //		or the caller doesn't have permission to change one of them.
 //	-E_INVAL if srcva >= UTOP or srcva is not page-aligned,
 //		or dstva >= UTOP or dstva is not page-aligned.
-//	-E_INVAL is srcva is not mapped in srcenvid's address space.
+//	-E_INVAL if srcva is not mapped in srcenvid's address space.
 //	-E_INVAL if perm is inappropriate (see sys_page_alloc).
 //	-E_INVAL if (perm & PTE_W), but srcva is read-only in srcenvid's
 //		address space.
@@ -321,18 +321,25 @@ sys_ipc_try_send(envid_t envid, uint32_t value, void *srcva, unsigned perm)
 	// LAB 9: Your code here.
     struct Env *e;
     int ret = envid2env(envid, &e, 0);
-    if (ret) return ret;//bad env
-    if (!e->env_ipc_recving) return -E_IPC_NOT_RECV;
+    if (ret)
+        return ret;
+    if (!e->env_ipc_recving)
+        return -E_IPC_NOT_RECV;
     if (srcva < (void*)UTOP) {
         pte_t *pte;
         struct PageInfo *pg = page_lookup(curenv->env_pgdir, srcva, &pte);
-        if (!pg) return -E_INVAL;
-        if ((*pte & perm) != perm) return -E_INVAL;
-        if ((perm & PTE_W) && !(*pte & PTE_W)) return -E_INVAL;
-        if (srcva != ROUNDDOWN(srcva, PGSIZE)) return -E_INVAL;
+        if (!pg)
+            return -E_INVAL;
+        if ((*pte & perm) != perm)
+            return -E_INVAL;
+        if ((perm & PTE_W) && !(*pte & PTE_W))
+            return -E_INVAL;
+        if (srcva != ROUNDDOWN(srcva, PGSIZE))
+            return -E_INVAL;
         if (e->env_ipc_dstva < (void*)UTOP) {
             ret = page_insert(e->env_pgdir, pg, e->env_ipc_dstva, perm);
-            if (ret) return ret;
+            if (ret)
+                return ret;
             e->env_ipc_perm = perm;
         }
     }

@@ -65,9 +65,9 @@ _pgfault_upcall:
 	// ways as registers become unavailable as scratch space.
 	//
 	// LAB 9: Your code here.
-    movl 0x28(%esp), %edx # trap-time eip
-    subl $0x4, 0x30(%esp) # we have to use subl now because we can't use after popfl
-    movl 0x30(%esp), %eax # trap-time esp-4
+    movl 0x28(%esp), %edx
+    subl $0x4, 0x30(%esp)
+    movl 0x30(%esp), %eax
     movl %edx, (%eax)
     addl $0x8, %esp
 
@@ -80,7 +80,7 @@ _pgfault_upcall:
 	// no longer use arithmetic operations or anything else that
 	// modifies eflags.
 	// LAB 9: Your code here.
-    addl $0x4, %esp #eip
+    addl $0x4, %esp
     popfl
 
 	// Switch back to the adjusted trap-time stack.

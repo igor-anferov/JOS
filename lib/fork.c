@@ -14,7 +14,7 @@
 static void
 pgfault(struct UTrapframe *utf)
 {
-	void *addr = (void *) utf->utf_fault_va;addr=addr;
+	void *addr = (void *) utf->utf_fault_va;
 	uint32_t err = utf->utf_err;
 
 	// Check that the faulting access was (1) a write, and (2) to a
@@ -67,9 +67,9 @@ duppage(envid_t envid, unsigned pn)
     void *addr = (void*) (pn*PGSIZE);
     if ((uvpt[pn] & PTE_W) || (uvpt[pn] & PTE_COW)) {
         if (sys_page_map(0, addr, envid, addr, PTE_COW|PTE_U|PTE_P) < 0)
-            panic("2");
-        if (sys_page_map(0, addr, 0, addr, PTE_COW|PTE_U|PTE_P) < 0)
-            panic("3");
+            panic("Child fail");
+        if (sys_page_map(0, addr, 0,     addr, PTE_COW|PTE_U|PTE_P) < 0)
+            panic("Parent fail");
     } else sys_page_map(0, addr, envid, addr, PTE_U|PTE_P);
     return 0;
 }
@@ -115,7 +115,7 @@ fork(void)
         }
     
     if (sys_page_alloc(envid, (void *)(UXSTACKTOP-PGSIZE), PTE_U|PTE_W|PTE_P) < 0)
-        panic("1");
+        panic("fork fail on sys_page_alloc call");
     extern void _pgfault_upcall();
     sys_env_set_pgfault_upcall(envid, _pgfault_upcall);
     
