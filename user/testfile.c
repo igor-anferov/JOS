@@ -117,7 +117,7 @@ umain(int argc, char **argv)
 			panic("read /big@%d: %i", i, r);
 		if (r != sizeof(buf))
 			panic("read /big from %d returned %d < %d bytes",
-			      i, r, sizeof(buf));
+			      i, r, (int) sizeof(buf));
 		if (*(int*)buf != i)
 			panic("read /big from %d returned bad data %d",
 			      i, *(int*)buf);

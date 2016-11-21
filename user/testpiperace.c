@@ -48,7 +48,7 @@ umain(int argc, char **argv)
 	cprintf("pid is %d\n", pid);
 	va = 0;
 	kid = &envs[ENVX(pid)];
-	cprintf("kid is %d\n", kid-envs);
+	cprintf("kid is %d\n", (int)(kid-envs));
 	dup(p[0], 10);
 	while (kid->env_status == ENV_RUNNABLE)
 		dup(p[0], 10);
