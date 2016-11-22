@@ -204,7 +204,7 @@ sys_page_alloc(envid_t envid, void *va, int perm)
     struct PageInfo *pg = page_alloc(ALLOC_ZERO);
     if (!pg)
         return -E_NO_MEM;
-    pg->pp_ref++;
+//    pg->pp_ref++;
     ret = page_insert(e->env_pgdir, pg, va, perm);
     if (ret) {
         page_free(pg);
@@ -346,7 +346,7 @@ sys_ipc_try_send(envid_t envid, uint32_t value, void *srcva, unsigned perm)
         struct PageInfo *pg = page_lookup(curenv->env_pgdir, srcva, &pte);
         if (!pg)
             return -E_INVAL;
-        if ((*pte & perm) != perm)
+        if ((*pte & perm & (PTE_P | PTE_W | PTE_U)) != (perm & (PTE_P | PTE_W | PTE_U)))
             return -E_INVAL;
         if ((perm & PTE_W) && !(*pte & PTE_W))
             return -E_INVAL;

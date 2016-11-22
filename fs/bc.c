@@ -91,7 +91,7 @@ flush_block(void *addr)
     if (ide_write(secno, pgva, BLKSECTS))
         panic("flush_block: ide write error");
     
-    if (sys_page_map(0, pgva, 0, pgva, pte & PTE_SYSCALL))
+    if (sys_page_map(0, pgva, 0, pgva, pte & PTE_SYSCALL & ~PTE_D))
         panic("flush_block: map error");
 }
 

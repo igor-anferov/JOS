@@ -64,7 +64,7 @@ alloc_block(void)
 	// LAB 10: Your code here.
     uint32_t blkno = 0;
     
-    for (blkno = 0; blkno != super->s_nblocks * BLKBITSIZE; ++blkno) {
+    for (blkno = 0; blkno != super->s_nblocks; ++blkno) {
         if (block_is_free(blkno)) {
             bitmap[blkno/32] &= ~(1<<(blkno%32));
             flush_block(diskaddr(blkno));

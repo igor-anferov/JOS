@@ -67,11 +67,13 @@ openfile_alloc(struct OpenFile **o)
 	int i, r;
 
 	// Find an available open-file table entry
+
 	for (i = 0; i < MAXOPEN; i++) {
 		switch (pageref(opentab[i].o_fd)) {
 		case 0:
 			if ((r = sys_page_alloc(0, opentab[i].o_fd, PTE_P|PTE_U|PTE_W)) < 0)
 				return r;
+                
 			/* fall through */
 		case 1:
 			opentab[i].o_fileid += MAXOPEN;
@@ -209,32 +211,27 @@ serve_read(envid_t envid, union Fsipc *ipc)
 {
 	struct Fsreq_read *req = &ipc->read;
 	struct Fsret_read *ret = &ipc->readRet;
-
+    
 	if (debug)
 		cprintf("serve_read %08x %08x %08x\n", envid, req->req_fileid, req->req_n);
 
 	// Lab 10: Your code here:
-    // Find open file.
-    struct OpenFile *o;
-    int r = openfile_lookup(envid, ipc->read.req_fileid, &o);
-    if (r < 0)
+    int r;
+    size_t nbytes;
+    struct OpenFile* o;
+    
+    r = openfile_lookup(envid, req->req_fileid, &o);
+    if (r < 0) {
+        cprintf("serve_read: failed to lookup open file id\n");
         return r;
+    }
     
-    struct File *f = o->o_file;
-    struct Fd *fd = o->o_fd;
+    nbytes = file_read(o->o_file, (void *) ret->ret_buf, MIN(req->req_n, PGSIZE), o->o_fd->fd_offset);
+    if (nbytes > 0) {
+        o->o_fd->fd_offset += nbytes;
+    }
     
-    // Actual size to read.
-    size_t rdsz = req->req_n < PGSIZE ? req->req_n : PGSIZE;
-    
-    // Actual size readed.
-    ssize_t rddsz = file_read(f, ret->ret_buf, rdsz, fd->fd_offset);
-    if (rddsz < 0)
-        return rddsz;
-    
-    // Update current seek position.
-    fd->fd_offset += rddsz;
-    
-    return rddsz;
+    return nbytes;
 }
 
 
@@ -249,31 +246,23 @@ serve_write(envid_t envid, struct Fsreq_write *req)
 		cprintf("serve_write %08x %08x %08x\n", envid, req->req_fileid, req->req_n);
 
 	// LAB 10: Your code here.
-    // Find open file.
+    int r;
     struct OpenFile *o;
-    int r = openfile_lookup(envid, req->req_fileid, &o);
-    if (r < 0)
+    size_t nbytes;
+    
+    r = openfile_lookup(envid, req->req_fileid, &o);
+    if (r < 0) {
+        cprintf("serve_write: failed to lookup open file id\n");
         return r;
+    }
     
-    struct File *f = o->o_file;
-    struct Fd *fd = o->o_fd;
+    nbytes = MIN(req->req_n, PGSIZE - (sizeof(int) + sizeof(size_t)));
+    nbytes = file_write(o->o_file, (void *) req->req_buf, nbytes, o->o_fd->fd_offset);
+    if (nbytes >= 0) {
+        o->o_fd->fd_offset += nbytes;
+    }
     
-    // Actual size to write.
-    size_t wrsz = req->req_n < PGSIZE ? req->req_n : PGSIZE;
-    
-    // Maybe the file needs extention.
-    if (fd->fd_offset + wrsz > f->f_size)
-        f->f_size = fd->fd_offset + wrsz;
-    
-    // Actual size written.
-    ssize_t wrnsz = file_write(f, req->req_buf, wrsz, fd->fd_offset);
-    if (wrnsz < 0)
-        return wrnsz;
-    
-    // Update current seek position.
-    fd->fd_offset += wrnsz;
-    
-    return wrnsz;
+    return nbytes;
 }
 
 // Stat ipc->stat.req_fileid.  Return the file's struct Stat to the
