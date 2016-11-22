@@ -62,9 +62,9 @@ alloc_block(void)
 	// super->s_nblocks blocks in the disk altogether.
 
 	// LAB 10: Your code here.
-    uint32_t blkno = 0;
+    uint32_t blkno;
     
-    for (blkno = 0; blkno != super->s_nblocks; ++blkno) {
+    for (blkno = 0; blkno < super->s_nblocks; ++blkno) {
         if (block_is_free(blkno)) {
             bitmap[blkno/32] &= ~(1<<(blkno%32));
             flush_block(diskaddr(blkno));

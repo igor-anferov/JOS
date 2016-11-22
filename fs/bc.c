@@ -53,14 +53,9 @@ bc_pgfault(struct UTrapframe *utf)
     if ((r = ide_read(blockno*BLKSECTS, addr, BLKSECTS)) < 0)
         panic("ide_read: %e", (double)r);
 
-	// Clear the dirty bit for the disk block page since we just read the
-	// block from disk
-	if ((r = sys_page_map(0, addr, 0, addr, uvpt[PGNUM(addr)] & PTE_SYSCALL)) < 0)
+	if ((r = sys_page_map(0, addr, 0, addr, uvpt[PGNUM(addr)] & PTE_SYSCALL & ~PTE_D)) < 0)
 		panic("in bc_pgfault, sys_page_map: %i", r);
 
-	// Check that the block we read was allocated. (exercise for
-	// the reader: why do we do this *after* reading the block
-	// in?)
 	if (bitmap && block_is_free(blockno))
 		panic("reading free block %08x\n", blockno);
 }
