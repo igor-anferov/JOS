@@ -65,12 +65,15 @@ duppage(envid_t envid, unsigned pn)
 {
 	// LAB 9: Your code here.
     void *addr = (void*) (pn*PGSIZE);
-    if ((uvpt[pn] & PTE_W) || (uvpt[pn] & PTE_COW)) {
+    if (uvpt[pn] & PTE_SHARE) {
+        sys_page_map(0, addr, envid, addr, uvpt[pn]&PTE_SYSCALL);
+    } else if ((uvpt[pn] & PTE_W) || (uvpt[pn] & PTE_COW)) {
         if (sys_page_map(0, addr, envid, addr, PTE_COW|PTE_U|PTE_P) < 0)
             panic("Child fail");
-        if (sys_page_map(0, addr, 0,     addr, PTE_COW|PTE_U|PTE_P) < 0)
+        if (sys_page_map(0, addr, 0, addr, PTE_COW|PTE_U|PTE_P) < 0)
             panic("Parent fail");
     } else sys_page_map(0, addr, envid, addr, PTE_U|PTE_P);
+    // cprintf("2\n");
     return 0;
 }
 

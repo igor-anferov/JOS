@@ -86,6 +86,8 @@ trap_init(void)
     void th13();
     void th14();
     void th16();
+    void th33();
+    void th36();
     void th48();
     SETGATE(idt[0], 0, GD_KT, th0, 0);
     SETGATE(idt[1], 0, GD_KT, th1, 0);
@@ -102,6 +104,8 @@ trap_init(void)
     SETGATE(idt[13], 0, GD_KT, th13, 0);
     SETGATE(idt[14], 0, GD_KT, th14, 0);
     SETGATE(idt[16], 0, GD_KT, th16, 0);
+    SETGATE(idt[33], 0, GD_KT, th48, 0);
+    SETGATE(idt[36], 0, GD_KT, th48, 0);
     SETGATE(idt[48], 0, GD_KT, th48, 3);
 
 	// Per-CPU setup
@@ -225,6 +229,15 @@ trap_dispatch(struct Trapframe *tf)
 
 	// Handle keyboard and serial interrupts.
 	// LAB 11: Your code here.
+    if (tf->tf_trapno == IRQ_OFFSET + IRQ_KBD) {
+        kbd_intr();
+        return;
+    }
+    
+    if (tf->tf_trapno == IRQ_OFFSET + IRQ_SERIAL) {
+        serial_intr();
+        return;
+    }
 
 	print_trapframe(tf);
 	if (tf->tf_cs == GD_KT) {
