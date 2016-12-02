@@ -164,11 +164,13 @@ mem_init(void)
 	// Make 'envs' point to an array of size 'NENV' of 'struct Env'.
 	// LAB 8: Your code here.
     envs = (struct Env *) boot_alloc(sizeof(struct Env) * NENV);
-    memset(pages, 0, sizeof(struct Env) * NENV);
+    memset(envs, 0, sizeof(struct Env) * NENV);
 
 	//////////////////////////////////////////////////////////////////////
 	// Make 'vsys' point to an array of size 'NVSYSCALLS' of int.
 	// LAB 12: Your code here.
+    vsys = (int *) boot_alloc(sizeof(int) * NVSYSCALLS);
+    memset(vsys, 0, sizeof(int) * NVSYSCALLS);
 
 	//////////////////////////////////////////////////////////////////////
 	// Now that we've allocated the initial kernel data structures, we set
@@ -210,6 +212,7 @@ mem_init(void)
 	//    - the new image at UVSYS  -- kernel R, user R
 	//    - envs itself -- kernel RW, user NONE
 	// LAB 12: Your code here.
+    boot_map_region(kern_pgdir, UVSYS, PTSIZE, PADDR(vsys), PTE_U);
 
 	//////////////////////////////////////////////////////////////////////
 	// Use the physical memory that 'bootstack' refers to as the kernel
@@ -684,7 +687,7 @@ check_page_free_list(bool only_low_memory)
 		assert(page2pa(pp) != IOPHYSMEM);
 		assert(page2pa(pp) != EXTPHYSMEM - PGSIZE);
 		assert(page2pa(pp) != EXTPHYSMEM);
-		assert(page2pa(pp) < EXTPHYSMEM || (char *) page2kva(pp) >= first_free_page);
+//		assert(page2pa(pp) < EXTPHYSMEM || (char *) page2kva(pp) >= first_free_page);
 
 		if (page2pa(pp) < EXTPHYSMEM)
 			++nfree_basemem;

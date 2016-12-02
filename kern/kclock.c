@@ -1,6 +1,7 @@
 /* See COPYRIGHT for copyright information. */
 
 #include <inc/x86.h>
+#include <inc/time.h>
 #include <kern/kclock.h>
 #include <inc/stdio.h>
 
@@ -8,9 +9,34 @@ int gettime(void)
 {
 	nmi_disable();
 	// LAB 12: your code here
+    struct tm time;
+    int uip, res_time[2], i;
+    
+    do {
+        outb(IO_RTC_CMND, RTC_AREG);
+        do {
+            uip = inb(IO_RTC_DATA) & RTC_UPDATE_IN_PROGRESS;
+        } while (uip);
+        
+        for (i=0; i<2; i++) {
+            outb(IO_RTC_CMND, RTC_SEC);
+            time.tm_sec = BCD2BIN(inb(IO_RTC_DATA));
+            outb(IO_RTC_CMND, RTC_MIN);
+            time.tm_min = BCD2BIN(inb(IO_RTC_DATA));
+            outb(IO_RTC_CMND, RTC_HOUR);
+            time.tm_hour = BCD2BIN(inb(IO_RTC_DATA));
+            outb(IO_RTC_CMND, RTC_DAY);
+            time.tm_mday = BCD2BIN(inb(IO_RTC_DATA));
+            outb(IO_RTC_CMND, RTC_MON);
+            time.tm_mon = BCD2BIN(inb(IO_RTC_DATA)) - 1;
+            outb(IO_RTC_CMND, RTC_YEAR);
+            time.tm_year = BCD2BIN(inb(IO_RTC_DATA));
+            res_time[i] = timestamp( &time );
+        }
+    } while (res_time[0] != res_time[1]);
 
 	nmi_enable();
-	return 0;
+	return res_time[0];
 }
 
 void
