@@ -301,8 +301,8 @@ page_init(void)
 		pages[i].pp_link = page_free_list;
 		page_free_list = &pages[i];
 	}
-    int extend = (int)ROUNDUP( ((char*)envs)
-                               +(sizeof(struct Env) * NENV)
+    int extend = (int)ROUNDUP( ((char*)vsys)
+                               +(sizeof(int) * NVSYSCALLS)
                                - KERNTOP,
                                                              PGSIZE)/PGSIZE;
     for (i = npages_basemem; i < extend; i++) {
@@ -687,7 +687,7 @@ check_page_free_list(bool only_low_memory)
 		assert(page2pa(pp) != IOPHYSMEM);
 		assert(page2pa(pp) != EXTPHYSMEM - PGSIZE);
 		assert(page2pa(pp) != EXTPHYSMEM);
-//		assert(page2pa(pp) < EXTPHYSMEM || (char *) page2kva(pp) >= first_free_page);
+		assert(page2pa(pp) < EXTPHYSMEM || (char *) page2kva(pp) >= first_free_page);
 
 		if (page2pa(pp) < EXTPHYSMEM)
 			++nfree_basemem;
