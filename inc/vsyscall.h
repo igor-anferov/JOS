@@ -4,7 +4,7 @@
 /* system call numbers */
 enum {
 	VSYS_gettime,
-	NVSYSCALLS = 1
+	NVSYSCALLS
 };
 
 #endif /* !JOS_INC_VSYSCALL_H */
