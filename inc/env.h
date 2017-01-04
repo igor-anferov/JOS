@@ -43,7 +43,8 @@ enum EnvType {
 	ENV_TYPE_IDLE = 0,
 	ENV_TYPE_KERNEL,
 	ENV_TYPE_USER,
-	ENV_TYPE_FS,		// File system server
+    ENV_TYPE_FS,		// File system server
+    ENV_TYPE_MD,		// Memory deduplicator
 };
 
 struct Env {

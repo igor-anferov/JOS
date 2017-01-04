@@ -76,7 +76,13 @@ sys_page_alloc(envid_t envid, void *va, int perm)
 int
 sys_page_map(envid_t srcenv, void *srcva, envid_t dstenv, void *dstva, int perm)
 {
-	return syscall(SYS_page_map, 1, srcenv, (uint32_t) srcva, dstenv, (uint32_t) dstva, perm);
+    return syscall(SYS_page_map, 1, srcenv, (uint32_t) srcva, dstenv, (uint32_t) dstva, perm);
+}
+
+int
+sys_page_pa(envid_t envid, void *va)
+{
+    return syscall(SYS_page_pa, 0, envid, (uint32_t) va, 0, 0, 0);
 }
 
 int

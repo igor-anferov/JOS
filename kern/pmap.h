@@ -63,6 +63,7 @@ void	page_decref(struct PageInfo *pp);
 
 void	tlb_invalidate(pde_t *pgdir, void *va);
 void    meminfo(void);
+void *  page_pa(pde_t *pgdir, void *va);
 void    print_page_free_list_info(struct PageInfo *);
 
 

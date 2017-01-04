@@ -69,14 +69,15 @@ i386_init(void)
     ENV_CREATE_KERNEL_TYPE(prog__test6);
 #endif
 #else
-	ENV_CREATE(fs_fs, ENV_TYPE_FS);
+    ENV_CREATE(fs_fs, ENV_TYPE_FS);
+    ENV_CREATE(user_lmm, ENV_TYPE_MD);
 
 #if defined(TEST)
     // Don't touch -- used by grading script!
     ENV_CREATE(TEST, ENV_TYPE_USER);
 #else
 	// Touch all you want.
-	ENV_CREATE(user_icode, ENV_TYPE_USER);
+//	ENV_CREATE(user_icode, ENV_TYPE_USER);
 #endif // TEST*
 #endif
 
