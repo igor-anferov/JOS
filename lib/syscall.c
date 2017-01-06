@@ -80,12 +80,6 @@ sys_page_map(envid_t srcenv, void *srcva, envid_t dstenv, void *dstva, int perm)
 }
 
 int
-sys_page_pa(envid_t envid, void *va)
-{
-    return syscall(SYS_page_pa, 0, envid, (uint32_t) va, 0, 0, 0);
-}
-
-int
 sys_page_unmap(envid_t envid, void *va)
 {
 	return syscall(SYS_page_unmap, 1, envid, (uint32_t) va, 0, 0, 0);

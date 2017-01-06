@@ -506,12 +506,6 @@ page_lookup(pde_t *pgdir, void *va, pte_t **pte_store)
     return pa2page(PTE_ADDR(*pte));
 }
 
-void *
-page_pa(pde_t *pgdir, void *va)
-{
-    return (void *)page2pa(page_lookup(pgdir, va, 0));
-}
-
 //
 // Unmaps the physical page at virtual address 'va'.
 // If there is no physical page at that address, silently does nothing.

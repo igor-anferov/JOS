@@ -262,7 +262,7 @@ sys_page_map(envid_t srcenvid, void *srcva,
             ROUNDDOWN(srcva,PGSIZE)!=srcva || ROUNDDOWN(dstva,PGSIZE)!=dstva)
             return -E_INVAL;
     }
-    
+
     pte_t *pte;
     struct PageInfo *pg = page_lookup(se->env_pgdir, srcva, &pte);
     if (!pg)
@@ -277,23 +277,6 @@ sys_page_map(envid_t srcenvid, void *srcva,
     
     ret = page_insert(de->env_pgdir, pg, dstva, perm);
     return ret;
-}
-
-static int
-sys_page_pa(envid_t envid, void *va)
-{
-    struct Env *e;
-    int ret;
-    
-    if (curenv->env_type != ENV_TYPE_MD) {
-        return 0;
-    }
-    
-    ret = envid2env(envid, &e, 1);
-    if (ret)
-        return 0;
-    
-    return (int)page_pa(e->env_pgdir, va);
 }
 
 // Unmap the page of memory at 'va' in the address space of 'envid'.
@@ -473,8 +456,6 @@ syscall(uint32_t syscallno, uint32_t a1, uint32_t a2, uint32_t a3, uint32_t a4, 
             return sys_env_set_trapframe(a1, (struct Trapframe *)a2);
         case SYS_gettime:
             return sys_gettime();
-        case SYS_page_pa:
-            return sys_page_pa(a1, (void*)a2);
         default:
             ret = -E_INVAL;
     }
