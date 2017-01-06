@@ -9,9 +9,10 @@
 
 // Assembly language pgfault entrypoint defined in lib/pfentry.S.
 extern void _pgfault_upcall(void);
+extern void pgfault(struct UTrapframe *utf);
 
 // Pointer to currently installed C-language pgfault handler.
-void (*_pgfault_handler)(struct UTrapframe *utf);
+void (* _pgfault_handler)(struct UTrapframe *utf) = pgfault;
 
 //
 // Set the page fault handler function.

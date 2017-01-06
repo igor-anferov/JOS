@@ -469,6 +469,7 @@ load_icode(struct Env *e, uint8_t *binary, size_t size)
 	// at virtual address USTACKTOP - PGSIZE.
 	// LAB 8: Your code here.
     region_alloc(e, (void *) (USTACKTOP - PGSIZE), PGSIZE);
+    region_alloc(e, (void *) (UXSTACKTOP - PGSIZE), PGSIZE);
 }
 
 //

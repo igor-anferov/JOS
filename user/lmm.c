@@ -5,8 +5,8 @@ void
 umain(int argc, char **argv)
 {
     int i, j, k;
-    pde_t *pde = (pde_t *)0xe0000000;
-    pte_t *pte = (pte_t *)0xe0001000;
+    static const pde_t *pde = (pde_t *)0xe0000000;
+    static const pte_t *pte = (pte_t *)0xe0001000;
     
     cprintf("\n------------------ MEMORY MAP: ------------------\n");
     
@@ -34,7 +34,7 @@ umain(int argc, char **argv)
                         if (pte[k] & PTE_P) {
                             cprintf("        PTX: %04d | va: %05x*** --> pa: %05x***\n",
                                     k,
-                                    (unsigned int)(PGNUM(PGADDR(j, k, 0))),
+                                    (unsigned int)PGNUM(PGADDR(j, k, 0)),
                                     (unsigned int)PGNUM(PTE_ADDR(pte[k])));
                         }
                     }
