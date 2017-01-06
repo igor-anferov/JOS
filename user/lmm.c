@@ -1,8 +1,6 @@
 // list memory map
 #include <inc/lib.h>
 
-#define UVPD (UVPT+(UVPT>>12)*4)
-
 void
 umain(int argc, char **argv)
 {
@@ -17,17 +15,17 @@ umain(int argc, char **argv)
             
             cprintf("\n+ Environment %08x:\n", envs[i].env_id);
             
-            if (sys_page_map(envs[i].env_id, (void *)UVPD,
+            if (sys_page_map(envs[i].env_id, (void *)uvpd,
                              0, (void *)pde, PTE_P | PTE_U)) {
                 cprintf("sys_page_map ERROR!!! (1)\n");
                 exit();
             }
             
-            for (j=0; j<PDX(UTOP); j++) {
+            for (j=0; j<=PDX(USTACKTOP); j++) {
                 if (pde[j] & PTE_P) {
                     cprintf("    PDX: %04d\n", (unsigned int)j);
                     if (sys_page_map(envs[i].env_id,
-                                     (void *)( UVPT + sizeof(pte_t)*PGNUM( PGADDR(j, 0, 0) ) ),
+                                     (void *)( &uvpt[ PGNUM( PGADDR(j, 0, 0) ) ] ),
                                      0, (void *)pte, PTE_P | PTE_U)) {
                         cprintf("sys_page_map ERROR!!! (2)\n");
                         exit();
