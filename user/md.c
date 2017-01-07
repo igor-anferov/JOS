@@ -4,7 +4,7 @@
 
 #define HASH_TABLE_SIZE 10
 #define MAX_NODES       100
-#define PERIOD          10       // sec
+#define PERIOD          5       // sec
 
 #define PTE_COW		0x800
 
@@ -162,7 +162,16 @@ void add_to_hash(node *n) {
             continue;
         }
         
-        if ( !(line->pte & PTE_COW) && (line->pte & PTE_W) ) {
+        if (PTE_ADDR(line->pte) == PTE_ADDR(n->pte)) {
+            free_node(n);
+            
+            sys_page_unmap(0, add_pg);
+            sys_page_unmap(0, comp_pg);
+
+            return;
+        }
+        
+        if ( line->pte & PTE_W ) {
             line->pte &= ~PTE_W;
             line->pte |= PTE_COW;
             
@@ -186,7 +195,7 @@ void add_to_hash(node *n) {
         
         if (sys_page_map(envs[line->env].env_id, line->pg,
                          envs[n->env].env_id, n->pg,
-                         PTE_U | PTE_P | (n->pte & PTE_W ? PTE_COW : 0) )) {
+                         PTE_U | PTE_P | ((n->pte & PTE_W) | (n->pte & PTE_COW) ? PTE_COW : 0) )) {
             cprintf("sys_page_map ERROR!!! (6)\n");
             exit();
         }
@@ -217,16 +226,18 @@ umain(int argc, char **argv) {
     static pde_t *pde = (pde_t *) 0xe0000000;
     static pte_t *pte = (pte_t *) 0xe0001000;
     
-    static int old_time, new_time = 0;
+    static int old_time = 0, new_time = 0;
     
     while (1) {
         
-        old_time = new_time;
-        new_time = vsys_gettime();
-        
-        if (old_time && new_time - old_time < PERIOD) {
+        do {
+            new_time = sys_gettime();
+            if (old_time == 0 || (new_time - old_time >= PERIOD))
+                break;
             sys_yield();
-        }
+        } while (1);
+        
+        old_time = new_time;
         
         cprintf("\n------ MEMORY DEDUPLICATION UNIT ------\n\n");
         
@@ -269,6 +280,6 @@ umain(int argc, char **argv) {
         
         cprintf("\nDeduplicated %d page(s)\n", deduplicated_pages);
         cprintf("\n------ MEMORY DEDUPLICATION UNIT ENDS ------\n\n");
-        exit();
+        sys_yield();
     }
 }
