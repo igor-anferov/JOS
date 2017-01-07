@@ -166,6 +166,8 @@ sys_env_set_pgfault_upcall(envid_t envid, void *func)
     int ret = envid2env(envid, &e, 1);
     if (ret)
         return ret;
+//    cprintf("!!! sys_env_set_pgfault_upcall: env = %08x, func = %08x\n",
+//            (unsigned int)e->env_id, (unsigned int)func);
     e->env_pgfault_upcall = func;
     return 0;
 }
@@ -346,6 +348,7 @@ sys_ipc_try_send(envid_t envid, uint32_t value, void *srcva, unsigned perm)
 	// LAB 9: Your code here.
     struct Env *e;
     int ret = envid2env(envid, &e, 0);
+    cprintf("!!! sys_ipc_try_send: envid = %d, ret = %d\n", envid, ret);
     if (ret)
         return ret;
     if (!e->env_ipc_recving)

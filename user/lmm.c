@@ -5,8 +5,8 @@ void
 umain(int argc, char **argv)
 {
     int i, j, k;
-    static const pde_t *pde = (pde_t *)0xe0000000;
-    static const pte_t *pte = (pte_t *)0xe0001000;
+    static pde_t *pde = (pde_t *)0xe0000000;
+    static pte_t *pte = (pte_t *)0xe0001000;
     
     cprintf("\n------------------ MEMORY MAP: ------------------\n");
     

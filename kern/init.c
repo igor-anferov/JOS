@@ -71,6 +71,8 @@ i386_init(void)
 #else
     ENV_CREATE(fs_fs, ENV_TYPE_FS);
     ENV_CREATE(user_lmm, ENV_TYPE_MD);
+    ENV_CREATE(user_md, ENV_TYPE_MD);
+    ENV_CREATE(user_lmm, ENV_TYPE_MD);
 
 #if defined(TEST)
     // Don't touch -- used by grading script!

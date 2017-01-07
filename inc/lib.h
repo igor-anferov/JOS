@@ -18,6 +18,7 @@
 #include <inc/syscall.h>
 #include <inc/vsyscall.h>
 #include <inc/trap.h>
+#include <inc/stab.h>
 #include <inc/fs.h>
 #include <inc/fd.h>
 #include <inc/args.h>
