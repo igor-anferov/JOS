@@ -89,6 +89,8 @@ KERN_BINFILES :=	user/hello \
 			fs/fs \
 			user/md \
 			user/lmm \
+			user/testmd1 \
+			user/testmd2 \
 			user/testfdsharing \
 			user/testpipe \
 			user/testpiperace \

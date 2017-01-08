@@ -3,8 +3,8 @@
 #include <inc/lib.h>
 
 #define HASH_TABLE_SIZE 10
-#define MAX_NODES       100
-#define PERIOD          5       // sec
+#define MAX_NODES       1000
+#define PERIOD          0       // sec
 
 #define PTE_COW		0x800
 
@@ -185,7 +185,7 @@ void add_to_hash(node *n) {
                 exit();
             }
             
-            cprintf("[%08x]:0x%05x >-<\n",
+            cprintf("[%08x]:0x%05x*** >-<\n",
                     (unsigned int)envs[line->env].env_id, (unsigned int)PGNUM(line->pg));
         }
         
@@ -200,7 +200,7 @@ void add_to_hash(node *n) {
             exit();
         }
         
-        cprintf("[%08x]:0x%05x --> [%08x]:0x%05x\n",
+        cprintf("[%08x]:0x%05x*** --> [%08x]:0x%05x***\n",
                 (unsigned int)envs[n->env].env_id, (unsigned int)PGNUM(n->pg),
                 (unsigned int)envs[line->env].env_id, (unsigned int)PGNUM(line->pg));
 
@@ -239,7 +239,7 @@ umain(int argc, char **argv) {
         
         old_time = new_time;
         
-        cprintf("\n------ MEMORY DEDUPLICATION UNIT ------\n\n");
+        cprintf("\n------------ MEMORY DEDUPLICATION -------------\n\n");
         
         init();
         
@@ -279,7 +279,7 @@ umain(int argc, char **argv) {
         }
         
         cprintf("\nDeduplicated %d page(s)\n", deduplicated_pages);
-        cprintf("\n------ MEMORY DEDUPLICATION UNIT ENDS ------\n\n");
+        cprintf("\n--------- END OF MEMORY DEDUPLICATION ---------\n\n");
         sys_yield();
     }
 }

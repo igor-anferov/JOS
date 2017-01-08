@@ -30,7 +30,7 @@ sched_yield(void)
     int i, ring=NENV;
     
     if (curenv == NULL)
-        curenv = envs;
+        curenv = &envs[NENV-1];
     
     if ( curenv->env_status == ENV_RUNNING )
         curenv->env_status = ENV_RUNNABLE;

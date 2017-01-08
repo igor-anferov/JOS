@@ -48,7 +48,8 @@ i386_init(void)
 	pic_init();
 	rtc_init();
     
-    irq_setmask_8259A(irq_mask_8259A & ~(1<<IRQ_CLOCK));
+//    irq_setmask_8259A(irq_mask_8259A & ~(1<<IRQ_CLOCK));
+    irq_setmask_8259A(irq_mask_8259A);
     
 #ifdef CONFIG_KSPACE
 #if __GNUC__ < 6
@@ -70,6 +71,8 @@ i386_init(void)
 #endif
 #else
     ENV_CREATE(fs_fs, ENV_TYPE_FS);
+    ENV_CREATE(user_testmd1, ENV_TYPE_USER);
+    ENV_CREATE(user_testmd2, ENV_TYPE_USER);
     ENV_CREATE(user_lmm, ENV_TYPE_MD);
     ENV_CREATE(user_md, ENV_TYPE_MD);
     ENV_CREATE(user_lmm, ENV_TYPE_MD);
