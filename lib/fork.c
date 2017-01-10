@@ -119,8 +119,8 @@ fork(void)
     
     if (sys_page_alloc(envid, (void *)(UXSTACKTOP-PGSIZE), PTE_U|PTE_W|PTE_P) < 0)
         panic("fork fail on sys_page_alloc call");
-    extern void _pgfault_upcall();
-    sys_env_set_pgfault_upcall(envid, _pgfault_upcall);
+    extern void _pgfault_upcall_gate();
+    sys_env_set_pgfault_upcall(envid, _pgfault_upcall_gate);
     
     if (sys_env_set_status(envid, ENV_RUNNABLE) < 0)
         panic("sys_env_set_status");

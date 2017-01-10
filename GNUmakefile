@@ -169,7 +169,7 @@ QEMUOPTS += $(shell if $(QEMU) -nographic -help | grep -q '^-D '; then echo '-D 
 IMAGES = $(OBJDIR)/kern/kernel.img
 QEMUOPTS += -drive format=raw,index=1,media=disk,file=$(OBJDIR)/fs/fs.img
 IMAGES += $(OBJDIR)/fs/fs.img
-QEMUOPTS += -monitor pipe:montest $(QEMUEXTRA)
+QEMUOPTS += $(QEMUEXTRA)
 
 define POST_CHECKOUT
 #!/bin/sh -x

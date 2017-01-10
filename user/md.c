@@ -82,12 +82,12 @@ void set_pgfault_upcall(int envid) {
     STABSTR_BEGIN = (char *)(0xe0000000+((long *)stabs)[2]);
     STABSTR_END = (char *)(0xe0000000+((long *)stabs)[3]);
     
-    if ((res = find_function("set_pgfault_handler")) == NULL) {
-        cprintf("ERROR!!! _pgfault_upcall not found!\n");
+    if ((res = find_function("_pgfault_upcall_gate")) == NULL) {
+        cprintf("ERROR!!! _pgfault_upcall_gate not found!\n");
         exit();
     }
     
-    sys_env_set_pgfault_upcall(envid, res+0x6F);
+    sys_env_set_pgfault_upcall(envid, res);
     
     for (j=0; j<i; j++) {
         sys_page_unmap(0, (void *)(stabs+j*PGSIZE));
@@ -152,6 +152,15 @@ void add_to_hash(node *n) {
     
     for (; line; line = line->next) {
         
+        if (PTE_ADDR(line->pte) == PTE_ADDR(n->pte)) {
+            free_node(n);
+            
+            sys_page_unmap(0, add_pg);
+            sys_page_unmap(0, comp_pg);
+            
+            return;
+        }
+        
         if (sys_page_map(envs[line->env].env_id, line->pg,
                          0, (void *)comp_pg, PTE_P | PTE_U)) {
             cprintf("sys_page_map ERROR!!! (4)\n");
@@ -160,15 +169,6 @@ void add_to_hash(node *n) {
         
         if (!pages_are_equal(add_pg, comp_pg)) {
             continue;
-        }
-        
-        if (PTE_ADDR(line->pte) == PTE_ADDR(n->pte)) {
-            free_node(n);
-            
-            sys_page_unmap(0, add_pg);
-            sys_page_unmap(0, comp_pg);
-
-            return;
         }
         
         if ( line->pte & PTE_W ) {

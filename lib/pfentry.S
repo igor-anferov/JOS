@@ -32,6 +32,7 @@
 .text
 .globl _pgfault_upcall
 _pgfault_upcall:
+    addl $0x10, %esp
 	// Call the C page fault handler.
 	pushl %esp			// function argument: pointer to UTF
 	movl _pgfault_handler, %eax
